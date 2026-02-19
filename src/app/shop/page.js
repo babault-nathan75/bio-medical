@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import dbConnect from '@/lib/dbConnect';
 import Product from '@/models/Product';
 import Navbar from '@/components/Navbar';
@@ -5,9 +6,18 @@ import AddToCartButton from '@/components/AddToCartButton';
 import Footer from '@/components/Footer';
 
 export const dynamic = 'force-dynamic';
+
 export default async function ShopPage() {
   await dbConnect();
-  const products = await Product.find({}).lean();
+  
+  // 1. On récupère les données brutes de MongoDB
+  const rawProducts = await Product.find({}).lean();
+
+  // 2. On transforme le _id (ObjectId) en String pour le passer au Client Component
+  const products = rawProducts.map((product) => ({
+    ...product,
+    _id: product._id.toString(), // C'est ICI que l'erreur se corrige
+  }));
 
   return (
     <div className="min-h-screen bg-white font-sans text-[#2D2D2D]">
@@ -28,24 +38,34 @@ export default async function ShopPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12">
           {products.map((product) => (
             <div key={product._id} className="group flex flex-col items-center">
-              {/* Image circulaire ou carrée épurée */}
-              <div className="relative w-full aspect-square bg-[#F9F7F5] mb-6 flex items-center justify-center overflow-hidden rounded-sm transition-all group-hover:bg-white group-hover:shadow-xl">
-                {product.imageUrl ? (
-                  <img src={product.imageUrl} alt={product.name} className="w-2/3 object-contain" />
-                ) : (
-                  <span className="text-6xl">💊</span>
-                )}
-              </div>
-              <h3 className="text-sm font-bold uppercase tracking-wider text-center">{product.name}</h3>
-              <p className="text-[#B57C4F] font-bold mt-2">{product.price.toLocaleString()} €</p>
               
-              <div className="mt-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                <AddToCartButton product={product} isAvailable={product.stockQuantity > 0} showText={true} />
+              {/* Image avec lien vers les détails */}
+              <Link href={`/shop/${product._id}`} className="w-full">
+                <div className="relative w-full aspect-square bg-[#F9F7F5] mb-6 flex items-center justify-center overflow-hidden rounded-sm transition-all group-hover:bg-white group-hover:shadow-xl border border-transparent group-hover:border-gray-100">
+                  {product.imageUrl ? (
+                    <img src={product.imageUrl} alt={product.name} className="w-2/3 object-contain" />
+                  ) : (
+                    <span className="text-6xl">💊</span>
+                  )}
+                </div>
+              </Link>
+
+              <h3 className="text-sm font-bold uppercase tracking-wider text-center h-10">{product.name}</h3>
+              <p className="text-[#B57C4F] font-bold mt-2">{product.price.toLocaleString('fr-FR')} €</p>
+              
+              {/* Le bouton qui reçoit désormais un _id en String */}
+              <div className="mt-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <AddToCartButton 
+                  product={product} 
+                  isAvailable={product.stockQuantity > 0} 
+                  showText={true} 
+                />
               </div>
             </div>
           ))}
         </div>
       </main>
+
       <Footer />
     </div>
   );
