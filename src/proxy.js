@@ -1,16 +1,15 @@
 import { NextResponse } from 'next/server';
 
-// On utilise 'export default' pour être sûr que Next.js 16 le reconnaisse immédiatement
-export default function middleware(request) {
+// On utilise 'export default' pour le nouveau fichier proxy.js
+export default function proxy(request) {
   const { pathname } = request.nextUrl;
 
-  // On protège toutes les routes /admin sauf la page de login
+  // Protection des routes /admin (sauf la page login)
   if (pathname.startsWith('/admin') && !pathname.startsWith('/admin/login')) {
     
-    // Récupération du cookie d'authentification
+    // Vérification du cookie
     const authCookie = request.cookies.get('admin_auth');
 
-    // Si pas de cookie valide, redirection vers le login
     if (!authCookie || authCookie.value !== 'true') {
       const loginUrl = new URL('/admin/login', request.url);
       return NextResponse.redirect(loginUrl);
@@ -20,7 +19,7 @@ export default function middleware(request) {
   return NextResponse.next();
 }
 
-// L'objet config DOIT rester un export nommé
+// La configuration du matcher reste la même
 export const config = {
   matcher: ['/admin/:path*'],
 };
