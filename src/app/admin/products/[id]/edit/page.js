@@ -1,12 +1,14 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, use } from 'react'; // <-- AJOUT DE 'use'
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 export default function EditProductPage({ params }) {
   const router = useRouter();
-  const { id } = params;
+  
+  // <-- CORRECTION : Déballage de la promesse params
+  const { id } = use(params); 
   
   const [loading, setLoading] = useState(false);
   const [pageLoading, setPageLoading] = useState(true);

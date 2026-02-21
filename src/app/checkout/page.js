@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react'; // <-- Ajout de useEffect
 import Link from 'next/link';
 import { useRouter } from 'next/navigation'; 
 import { useCart } from '@/context/CartContext';
@@ -10,7 +10,9 @@ export default function CheckoutPage() {
   const router = useRouter();
   const { cart, clearCart } = useCart(); 
   const totalPrice = cart.reduce((total, item) => total + (item.price * item.quantity), 0);
+  
   const [loading, setLoading] = useState(false);
+  const [mounted, setMounted] = useState(false); // <-- État de montage
 
   // État du formulaire avec Paris par défaut
   const [formData, setFormData] = useState({
@@ -20,6 +22,11 @@ export default function CheckoutPage() {
     address: '',
     city: 'Paris', 
   });
+
+  // Empêche l'erreur d'hydratation Next.js
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -52,7 +59,7 @@ export default function CheckoutPage() {
       if (data.success) {
         alert("Commande validée avec succès ! Bio Medical vous remercie.");
         clearCart(); 
-        router.push('/'); 
+        router.push('/'); // Redirection vers l'accueil ou une page de confirmation
       } else {
         alert("Erreur lors de la commande : " + data.error);
       }
@@ -63,14 +70,18 @@ export default function CheckoutPage() {
     }
   };
 
+  // On ne rend rien tant que le composant n'est pas monté côté client
+  if (!mounted) return null; 
+
   if (cart.length === 0) {
     return (
       <div className="min-h-screen bg-[#F8F9FA] font-sans">
         <Navbar backLink="/shop" />
         <div className="max-w-3xl mx-auto p-10 mt-10 text-center bg-white rounded-3xl shadow-sm border border-gray-100">
+          <span className="text-6xl block mb-6">🛒</span>
           <h1 className="text-2xl font-bold text-[#2D2D2D] mb-4">Votre panier est vide</h1>
           <p className="text-gray-500 mb-8">Vous devez ajouter des articles avant de passer à la caisse.</p>
-          <Link href="/shop" className="px-8 py-4 bg-[#B57C4F] text-white font-bold rounded-xl hover:bg-[#9C6840]">
+          <Link href="/shop" className="px-8 py-4 bg-[#B57C4F] text-white font-bold rounded-xl hover:bg-[#9C6840] transition-colors">
             Retourner à la boutique
           </Link>
         </div>
@@ -150,7 +161,7 @@ export default function CheckoutPage() {
               </div>
 
               <div className="mb-8">
-                <label className="block text-sm font-bold text-gray-700 mb-2">Ville / Commune</label>
+                <label className="block text-sm font-bold text-gray-700 mb-2">Ville</label>
                 <input 
                   type="text" 
                   name="city"
@@ -165,9 +176,14 @@ export default function CheckoutPage() {
               <button 
                 type="submit"
                 disabled={loading}
-                className={`w-full py-4 text-white font-bold text-lg rounded-xl transition-all shadow-lg hover:shadow-xl hover:-translate-y-1 ${loading ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#B57C4F] hover:bg-[#9C6840]'}`}
+                className={`w-full py-4 text-white font-bold text-lg rounded-xl transition-all shadow-lg hover:shadow-xl hover:-translate-y-1 flex items-center justify-center gap-2 ${loading ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#B57C4F] hover:bg-[#9C6840]'}`}
               >
-                {loading ? 'Validation en cours...' : 'Confirmer la commande'}
+                {loading ? (
+                  <>
+                    <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                    Validation en cours...
+                  </>
+                ) : 'Confirmer la commande'}
               </button>
             </form>
           </div>
@@ -176,7 +192,7 @@ export default function CheckoutPage() {
             <div className="bg-white rounded-3xl shadow-md border border-gray-100 p-6 sm:p-8 sticky top-28">
               <h2 className="text-lg font-bold text-[#2D2D2D] mb-4">Votre Commande</h2>
               
-              <div className="space-y-4 mb-6 max-h-[300px] overflow-y-auto pr-2">
+              <div className="space-y-4 mb-6 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
                 {cart.map((item) => (
                   <div key={item._id} className="flex items-center gap-4 border-b border-gray-50 pb-4">
                     <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center shrink-0">
@@ -195,12 +211,11 @@ export default function CheckoutPage() {
 
               <div className="border-t border-gray-100 pt-4">
                 <div className="flex justify-between items-center mb-2 text-sm text-gray-500">
-                  <span>Sous-total</span>
+                  <span>Montant du produit</span>
                   <span>{totalPrice.toLocaleString('fr-FR')} €</span>
                 </div>
-                <div className="flex justify-between items-center mb-4 text-sm text-gray-500">
-                  <span>Livraison</span>
-                  <span className="text-green-600 font-medium">Gratuite</span>
+                <div className="flex justify-between items-start mb-4 text-sm">
+                  <span className="text-green-600 font-medium">Le montant de la livraison vous sera communiqué lors de la livraison.</span>
                 </div>
                 <div className="flex justify-between items-end mt-4 pt-4 border-t border-gray-100">
                   <span className="text-lg font-bold text-[#2D2D2D]">Total à payer</span>

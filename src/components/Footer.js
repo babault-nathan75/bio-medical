@@ -1,3 +1,4 @@
+import Link from "next/link";
 export default function Footer() {
   return (
     <footer className="bg-[#f0f4f4] text-[#2D2D2D] pt-16 border-t border-gray-200">
@@ -27,7 +28,7 @@ export default function Footer() {
           <div>
             <h4 className="font-bold uppercase text-sm mb-6">Contact</h4>
             <p className="text-sm text-gray-500 mb-2">+33 1 79 75 37 38</p>
-            <p className="text-sm text-gray-500">order@biomedical.com</p>
+            <p className="text-sm text-gray-500">biomedicalparis@gmail.com</p>
           </div>
           <div>
             <h4 className="font-bold uppercase text-sm mb-6">Catégories Principales</h4>
@@ -39,7 +40,7 @@ export default function Footer() {
           </div>
           <div>
             <h4 className="font-bold uppercase text-sm mb-6">Modes de paiement</h4>
-            <div className="flex gap-4 grayscale opacity-50">
+            <div className="flex gap-4 opacity-50">
               <span className="text-2xl">💳</span>
               <span className="text-2xl">🏦</span>
             </div>
@@ -47,7 +48,7 @@ export default function Footer() {
         </div>
 
         <div className="py-8 border-t border-gray-300 text-center text-[10px] uppercase tracking-widest text-gray-400">
-          © 2026 Bio Medical - Tout pour votre santé et votre beauté
+          © 2026 <Link href="/admin/login" >Bio Medical</Link> - Tout pour votre santé et votre beauté
         </div>
       </div>
     </footer>

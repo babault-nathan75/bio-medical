@@ -5,7 +5,8 @@ import { useCart } from '@/context/CartContext';
 import Navbar from '@/components/Navbar';
 
 export default function CartPage() {
-  const { cart, removeFromCart } = useCart();
+  // Ajout de updateQuantity récupéré depuis le contexte
+  const { cart, removeFromCart, updateQuantity } = useCart();
 
   // Calcul du prix total du panier
   const totalPrice = cart.reduce((total, item) => total + (item.price * item.quantity), 0);
@@ -25,7 +26,7 @@ export default function CartPage() {
           <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-12 text-center flex flex-col items-center">
             <span className="text-8xl mb-6 grayscale opacity-20">🛒</span>
             <h2 className="text-2xl font-bold text-[#2D2D2D] mb-4">Votre panier est vide</h2>
-            <p className="text-gray-500 mb-8 max-w-md">Vous n'avez pas encore ajouté de soins ou de médicaments à votre panier.</p>
+            <p className="text-gray-500 mb-8 max-w-md">Vous n&apos;avez pas encore ajouté de soins ou de médicaments à votre panier.</p>
             <Link href="/shop" className="px-8 py-4 bg-[#B57C4F] text-white font-bold rounded-xl hover:bg-[#9C6840] transition-colors shadow-lg hover:shadow-xl hover:-translate-y-1">
               Retourner à la boutique
             </Link>
@@ -46,19 +47,41 @@ export default function CartPage() {
                     </span>
                   </div>
                   
-                  {/* Infos du produit */}
+                  {/* Infos du produit & Contrôleur de quantité */}
                   <div className="flex-grow">
                     <span className="text-[10px] sm:text-xs font-bold text-[#B57C4F] uppercase tracking-wider">{item.category}</span>
                     <h3 className="text-base sm:text-lg font-bold text-[#2D2D2D] leading-tight">{item.name}</h3>
-                    <div className="text-gray-500 text-sm mt-1">
-                      Quantité : <span className="font-bold text-[#2D2D2D]">{item.quantity}</span>
+                    
+                    {/* NOUVEAU : Contrôleur de quantité interactif */}
+                    <div className="flex items-center gap-3 mt-3">
+                      <span className="text-gray-500 text-sm hidden sm:inline">Quantité :</span>
+                      <div className="flex items-center bg-gray-50 border border-gray-200 rounded-lg overflow-hidden">
+                        <button 
+                          onClick={() => updateQuantity(item._id, item.quantity - 1)}
+                          disabled={item.quantity <= 1}
+                          className="px-3 py-1 text-gray-600 hover:bg-gray-200 disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
+                          aria-label="Diminuer la quantité"
+                        >
+                          -
+                        </button>
+                        <span className="px-3 py-1 font-bold text-[#2D2D2D] min-w-[2.5rem] text-center border-x border-gray-200">
+                          {item.quantity}
+                        </span>
+                        <button 
+                          onClick={() => updateQuantity(item._id, item.quantity + 1)}
+                          className="px-3 py-1 text-gray-600 hover:bg-gray-200 transition-colors"
+                          aria-label="Augmenter la quantité"
+                        >
+                          +
+                        </button>
+                      </div>
                     </div>
                   </div>
                   
                   {/* Prix et Suppression */}
                   <div className="flex flex-col items-end gap-3 shrink-0">
                     <span className="text-lg sm:text-xl font-black text-[#2D2D2D]">
-                      {(item.price * item.quantity).toLocaleString('fr-FR')} <span className="text-xs text-gray-400 font-medium">FCFA</span>
+                      {(item.price * item.quantity).toLocaleString('fr-FR')} <span className="text-xs text-gray-400 font-medium">€</span>
                     </span>
                     
                     <button 
@@ -81,12 +104,11 @@ export default function CartPage() {
                 
                 <div className="space-y-4 text-gray-600 mb-6">
                   <div className="flex justify-between">
-                    <span>Sous-total</span>
-                    <span className="font-semibold">{totalPrice.toLocaleString('fr-FR')} FCFA</span>
+                    <span>Montant du produit</span>
+                    <span className="font-semibold">{totalPrice.toLocaleString('fr-FR')} €</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Livraison estimée</span>
-                    <span className="text-green-600 font-medium">Gratuite</span>
+                    <span className="text-green-600 font-medium">Le montant de la livraison vous sera communiqué lors de la livraison</span>
                   </div>
                 </div>
                 
@@ -94,12 +116,11 @@ export default function CartPage() {
                   <div className="flex justify-between items-end">
                     <span className="text-lg font-bold text-[#2D2D2D]">Total</span>
                     <span className="text-3xl font-black text-[#B57C4F]">
-                      {totalPrice.toLocaleString('fr-FR')} <span className="text-lg text-gray-500 font-medium">FCFA</span>
+                      {totalPrice.toLocaleString('fr-FR')} <span className="text-lg text-gray-500 font-medium">€</span>
                     </span>
                   </div>
                 </div>
 
-                {/* Remplace le <button> par ce <Link> */}
                 <Link href="/checkout" className="w-full py-4 bg-[#2D2D2D] text-white font-bold text-lg rounded-xl hover:bg-[#1a1a1a] transition-all shadow-lg hover:shadow-xl hover:-translate-y-1 flex items-center justify-center gap-2">
                 Valider la commande
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
