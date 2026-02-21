@@ -48,7 +48,7 @@ export default function Footer() {
         </div>
 
         <div className="py-8 border-t border-gray-300 text-center text-[10px] uppercase tracking-widest text-gray-400">
-          © 2026 <Link href="/admin/login" >Bio Medical</Link> - Tout pour votre santé et votre beauté
+          © 2026 <Link href="/admin/login">Bio Medical</Link> - Tout pour votre santé et votre beauté
         </div>
       </div>
     </footer>
