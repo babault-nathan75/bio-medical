@@ -103,7 +103,7 @@ export default function AddProductPage() {
               
               <div className="flex gap-4">
                 <div className="w-1/2">
-                  <label className="block text-sm font-bold text-gray-700 mb-2">Prix (FCFA)</label>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">Prix (€)</label>
                   {/* MODIFICATION : step="0.01" ajouté pour les décimales */}
                   <input 
                     type="number" 
@@ -131,7 +131,7 @@ export default function AddProductPage() {
                   ))}
                 </select>
                 {categories.length === 0 && (
-                  <p className="text-xs text-red-500 mt-2 font-medium">⚠️ Aucune catégorie trouvée. Veuillez en créer une d'abord.</p>
+                  <p className="text-xs text-red-500 mt-2 font-medium">⚠️ Aucune catégorie trouvée. Veuillez en créer une d&#39;abord.</p>
                 )}
               </div>
 

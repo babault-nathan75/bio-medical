@@ -82,7 +82,7 @@ export default async function ProductDetails({ params }) {
                 <span className="text-4xl font-black text-[#2D2D2D]">
                   {product.price?.toLocaleString('fr-FR')}
                 </span>
-                <span className="text-xl text-gray-400 font-medium mb-1">FCFA</span>
+                <span className="text-xl text-gray-400 font-medium mb-1">€</span>
               </div>
               <p className={`text-sm mt-2 font-medium ${isAvailable ? 'text-green-600' : 'text-red-500'}`}>
                 {isAvailable ? `En stock (${product.stockQuantity} disponibles)` : 'Indisponible'}

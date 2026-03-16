@@ -1,65 +1,90 @@
-"use client"; // Indispensable car on utilise des hooks React (useState, useEffect)
+"use client";
 
 import { createContext, useState, useEffect, useContext } from 'react';
 
-// Création du contexte
 const CartContext = createContext();
 
 export function CartProvider({ children }) {
   const [cart, setCart] = useState([]);
 
-  // Fonction pour vider le panier après une commande
-  const clearCart = () => {
-    setCart([]);
-  };
-
-  // 1. Au chargement du site, on récupère le panier sauvegardé dans le navigateur
+  // 1. Chargement initial
   useEffect(() => {
     const savedCart = localStorage.getItem('bm_cart');
     if (savedCart) {
-      setCart(JSON.parse(savedCart));
+      try {
+        setCart(JSON.parse(savedCart));
+      } catch (e) {
+        console.error("Erreur lors du parsing du panier", e);
+      }
     }
   }, []);
 
-  // 2. À chaque modification du panier, on le sauvegarde dans le navigateur
+  // 2. Sauvegarde auto
   useEffect(() => {
     localStorage.setItem('bm_cart', JSON.stringify(cart));
   }, [cart]);
 
-  // Fonction pour ajouter un produit
+  // Ajouter au panier avec vérification de stock
   const addToCart = (product) => {
     setCart((prevCart) => {
-      // On vérifie si le produit est déjà dans le panier
       const existingProduct = prevCart.find(item => item._id === product._id);
       
       if (existingProduct) {
-        // S'il y est déjà, on augmente juste la quantité
+        // --- VÉRIFICATION DU STOCK ---
+        if (existingProduct.quantity >= product.stockQuantity) {
+          alert(`Désolé, seulement ${product.stockQuantity} unités sont disponibles pour ce produit.`);
+          return prevCart;
+        }
+
         return prevCart.map(item =>
           item._id === product._id
             ? { ...item, quantity: item.quantity + 1 }
             : item
         );
       }
-      // Sinon on l'ajoute avec une quantité de 1
       return [...prevCart, { ...product, quantity: 1 }];
     });
   };
 
-  // Fonction pour retirer un produit
   const removeFromCart = (productId) => {
     setCart((prevCart) => prevCart.filter(item => item._id !== productId));
   };
 
-  // Calcul du nombre total d'articles pour la petite bulle rouge dans la Navbar
+  // Mettre à jour la quantité avec vérification de stock
+  const updateQuantity = (productId, newQuantity) => {
+    if (newQuantity < 1) return;
+
+    setCart((prevCart) =>
+      prevCart.map((item) => {
+        if (item._id === productId) {
+          // --- VÉRIFICATION DU STOCK ---
+          if (newQuantity > item.stockQuantity) {
+            alert(`Stock limité : Vous ne pouvez pas commander plus de ${item.stockQuantity} articles.`);
+            return item; // On retourne l'item sans modifier sa quantité
+          }
+          return { ...item, quantity: newQuantity };
+        }
+        return item;
+      })
+    );
+  };
+
+  const clearCart = () => setCart([]);
+
   const totalItems = cart.reduce((total, item) => total + item.quantity, 0);
 
   return (
-    <CartContext.Provider value={{ cart, addToCart, removeFromCart, clearCart, totalItems }}>
+    <CartContext.Provider value={{ 
+      cart, 
+      addToCart, 
+      removeFromCart, 
+      updateQuantity, 
+      clearCart, 
+      totalItems 
+    }}>
       {children}
     </CartContext.Provider>
-    
   );
 }
 
-// Un petit hook personnalisé pour utiliser le panier facilement partout
 export const useCart = () => useContext(CartContext);

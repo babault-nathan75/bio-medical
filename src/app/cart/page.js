@@ -5,7 +5,6 @@ import { useCart } from '@/context/CartContext';
 import Navbar from '@/components/Navbar';
 
 export default function CartPage() {
-  // Ajout de updateQuantity récupéré depuis le contexte
   const { cart, removeFromCart, updateQuantity } = useCart();
 
   // Calcul du prix total du panier
@@ -17,12 +16,13 @@ export default function CartPage() {
 
       <main className="max-w-5xl mx-auto p-6 md:p-10">
         <header className="mb-10">
-          <h1 className="text-3xl md:text-4xl font-black text-[#2D2D2D]">Mon <span className="text-[#B57C4F]">Panier</span></h1>
+          <h1 className="text-3xl md:text-4xl font-black text-[#2D2D2D]">
+            Mon <span className="text-[#B57C4F]">Panier</span>
+          </h1>
           <p className="text-gray-500 mt-2">Vérifiez vos articles avant de passer commande.</p>
         </header>
 
         {cart.length === 0 ? (
-          // --- ÉTAT : PANIER VIDE ---
           <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-12 text-center flex flex-col items-center">
             <span className="text-8xl mb-6 grayscale opacity-20">🛒</span>
             <h2 className="text-2xl font-bold text-[#2D2D2D] mb-4">Votre panier est vide</h2>
@@ -32,7 +32,6 @@ export default function CartPage() {
             </Link>
           </div>
         ) : (
-          // --- ÉTAT : PANIER REMPLI ---
           <div className="flex flex-col lg:flex-row gap-8">
             
             {/* Liste des articles */}
@@ -43,7 +42,11 @@ export default function CartPage() {
                   {/* Image miniature */}
                   <div className="w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-br from-gray-50 to-[#F2D0B4]/20 rounded-xl flex items-center justify-center shrink-0">
                     <span className="text-3xl sm:text-4xl drop-shadow-sm">
-                      {item.imageUrl ? <img src={item.imageUrl} alt={item.name} className="object-cover w-full h-full rounded-xl" /> : '💊'}
+                      {item.imageUrl ? (
+                        <img src={item.imageUrl} alt={item.name} className="object-cover w-full h-full rounded-xl" />
+                      ) : (
+                        '💊'
+                      )}
                     </span>
                   </div>
                   
@@ -52,15 +55,19 @@ export default function CartPage() {
                     <span className="text-[10px] sm:text-xs font-bold text-[#B57C4F] uppercase tracking-wider">{item.category}</span>
                     <h3 className="text-base sm:text-lg font-bold text-[#2D2D2D] leading-tight">{item.name}</h3>
                     
-                    {/* NOUVEAU : Contrôleur de quantité interactif */}
+                    {/* Alerte stock faible */}
+                    {item.stockQuantity <= 5 && (
+                      <p className="text-red-500 text-[10px] font-bold mt-1 uppercase">
+                        Plus que {item.stockQuantity} en stock !
+                      </p>
+                    )}
+                    
                     <div className="flex items-center gap-3 mt-3">
-                      <span className="text-gray-500 text-sm hidden sm:inline">Quantité :</span>
                       <div className="flex items-center bg-gray-50 border border-gray-200 rounded-lg overflow-hidden">
                         <button 
                           onClick={() => updateQuantity(item._id, item.quantity - 1)}
                           disabled={item.quantity <= 1}
-                          className="px-3 py-1 text-gray-600 hover:bg-gray-200 disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
-                          aria-label="Diminuer la quantité"
+                          className="px-3 py-1 text-gray-600 hover:bg-gray-200 disabled:opacity-30 transition-colors"
                         >
                           -
                         </button>
@@ -69,8 +76,10 @@ export default function CartPage() {
                         </span>
                         <button 
                           onClick={() => updateQuantity(item._id, item.quantity + 1)}
-                          className="px-3 py-1 text-gray-600 hover:bg-gray-200 transition-colors"
-                          aria-label="Augmenter la quantité"
+                          // DESACTIVE LE BOUTON SI LE STOCK EST ATTEINT
+                          disabled={item.quantity >= item.stockQuantity}
+                          className="px-3 py-1 text-gray-600 hover:bg-gray-200 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                          title={item.quantity >= item.stockQuantity ? "Stock maximum atteint" : "Augmenter"}
                         >
                           +
                         </button>
@@ -92,47 +101,43 @@ export default function CartPage() {
                       <span className="hidden sm:inline">Retirer</span>
                     </button>
                   </div>
-
                 </div>
               ))}
             </div>
 
-            {/* Résumé de la commande (Panneau latéral) */}
+            {/* Résumé de la commande */}
             <div className="lg:w-1/3">
               <div className="bg-white rounded-3xl shadow-xl border border-gray-100 p-6 sm:p-8 sticky top-28">
-                <h2 className="text-xl font-bold text-[#2D2D2D] mb-6 border-b border-gray-100 pb-4">Résumé de la commande</h2>
+                <h2 className="text-xl font-bold text-[#2D2D2D] mb-6 border-b border-gray-100 pb-4">Résumé</h2>
                 
-                <div className="space-y-4 text-gray-600 mb-6">
+                <div className="space-y-4 text-gray-600 mb-6 text-sm">
                   <div className="flex justify-between">
-                    <span>Montant du produit</span>
+                    <span>Sous-total</span>
                     <span className="font-semibold">{totalPrice.toLocaleString('fr-FR')} €</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-green-600 font-medium">Le montant de la livraison vous sera communiqué lors de la livraison</span>
-                  </div>
+                  <p className="text-green-600 text-xs font-medium bg-green-50 p-3 rounded-xl">
+                    Le montant de la livraison vous sera communiqué par téléphone lors de la confirmation.
+                  </p>
                 </div>
                 
                 <div className="border-t border-gray-100 pt-6 mb-8">
                   <div className="flex justify-between items-end">
                     <span className="text-lg font-bold text-[#2D2D2D]">Total</span>
-                    <span className="text-3xl font-black text-[#B57C4F]">
-                      {totalPrice.toLocaleString('fr-FR')} <span className="text-lg text-gray-500 font-medium">€</span>
-                    </span>
+                    <div className="text-right">
+                      <span className="text-3xl font-black text-[#B57C4F]">
+                        {totalPrice.toLocaleString('fr-FR')}
+                      </span>
+                      <span className="ml-1 text-xs text-gray-500 font-medium uppercase">€</span>
+                    </div>
                   </div>
                 </div>
 
                 <Link href="/checkout" className="w-full py-4 bg-[#2D2D2D] text-white font-bold text-lg rounded-xl hover:bg-[#1a1a1a] transition-all shadow-lg hover:shadow-xl hover:-translate-y-1 flex items-center justify-center gap-2">
-                Valider la commande
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+                  Commander
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
                 </Link>
-                
-                <div className="mt-6 flex items-center justify-center gap-2 text-xs text-gray-400">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
-                  Paiement sécurisé
-                </div>
               </div>
             </div>
-
           </div>
         )}
       </main>

@@ -78,7 +78,7 @@ export default function EditProductPage({ params }) {
     }
   };
 
-  if (pageLoading) return <div className="p-12 text-center text-gray-500">Chargement de l'éditeur...</div>;
+  if (pageLoading) return <div className="p-12 text-center text-gray-500">Chargement de l&#39;éditeur...</div>;
 
   return (
     <div className="p-6 md:p-12">
@@ -109,7 +109,7 @@ export default function EditProductPage({ params }) {
               
               <div className="flex gap-4">
                 <div className="w-1/2">
-                  <label className="block text-sm font-bold text-gray-700 mb-2">Prix (FCFA)</label>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">Prix (€)</label>
                   {/* MODIFICATION ICI : step="any" permet les décimales */}
                   <input 
                     type="number" 

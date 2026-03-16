@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react'; // <-- Ajout de useEffect
+import { useState, useEffect } from 'react'; 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation'; 
 import { useCart } from '@/context/CartContext';
@@ -12,9 +12,9 @@ export default function CheckoutPage() {
   const totalPrice = cart.reduce((total, item) => total + (item.price * item.quantity), 0);
   
   const [loading, setLoading] = useState(false);
-  const [mounted, setMounted] = useState(false); // <-- État de montage
+  const [mounted, setMounted] = useState(false);
 
-  // État du formulaire avec Paris par défaut
+  // État du formulaire
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -59,7 +59,8 @@ export default function CheckoutPage() {
       if (data.success) {
         alert("Commande validée avec succès ! Bio Medical vous remercie.");
         clearCart(); 
-        router.push('/'); // Redirection vers l'accueil ou une page de confirmation
+        // Redirection vers la page de succès avec l'ID de commande
+        router.push(`/order-success?id=${data.order._id}`); 
       } else {
         alert("Erreur lors de la commande : " + data.error);
       }
@@ -100,7 +101,6 @@ export default function CheckoutPage() {
         </header>
 
         <div className="flex flex-col lg:flex-row gap-10">
-          
           <div className="lg:w-2/3">
             <form onSubmit={handleSubmit} className="bg-white rounded-3xl shadow-xl border border-gray-100 p-8 sm:p-10">
               <h2 className="text-xl font-bold text-[#2D2D2D] mb-6">Informations client</h2>
@@ -178,12 +178,7 @@ export default function CheckoutPage() {
                 disabled={loading}
                 className={`w-full py-4 text-white font-bold text-lg rounded-xl transition-all shadow-lg hover:shadow-xl hover:-translate-y-1 flex items-center justify-center gap-2 ${loading ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#B57C4F] hover:bg-[#9C6840]'}`}
               >
-                {loading ? (
-                  <>
-                    <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                    Validation en cours...
-                  </>
-                ) : 'Confirmer la commande'}
+                {loading ? 'Validation en cours...' : 'Confirmer la commande'}
               </button>
             </form>
           </div>
@@ -191,8 +186,7 @@ export default function CheckoutPage() {
           <div className="lg:w-1/3">
             <div className="bg-white rounded-3xl shadow-md border border-gray-100 p-6 sm:p-8 sticky top-28">
               <h2 className="text-lg font-bold text-[#2D2D2D] mb-4">Votre Commande</h2>
-              
-              <div className="space-y-4 mb-6 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+              <div className="space-y-4 mb-6 max-h-[300px] overflow-y-auto pr-2">
                 {cart.map((item) => (
                   <div key={item._id} className="flex items-center gap-4 border-b border-gray-50 pb-4">
                     <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center shrink-0">
@@ -208,25 +202,14 @@ export default function CheckoutPage() {
                   </div>
                 ))}
               </div>
-
               <div className="border-t border-gray-100 pt-4">
-                <div className="flex justify-between items-center mb-2 text-sm text-gray-500">
-                  <span>Montant du produit</span>
-                  <span>{totalPrice.toLocaleString('fr-FR')} €</span>
-                </div>
-                <div className="flex justify-between items-start mb-4 text-sm">
-                  <span className="text-green-600 font-medium">Le montant de la livraison vous sera communiqué lors de la livraison.</span>
-                </div>
-                <div className="flex justify-between items-end mt-4 pt-4 border-t border-gray-100">
+                <div className="flex justify-between items-center mb-4">
                   <span className="text-lg font-bold text-[#2D2D2D]">Total à payer</span>
-                  <span className="text-2xl font-black text-[#2D2D2D]">
-                    {totalPrice.toLocaleString('fr-FR')} <span className="text-sm text-gray-500 font-medium">€</span>
-                  </span>
+                  <span className="text-2xl font-black text-[#2D2D2D]">{totalPrice.toLocaleString('fr-FR')} €</span>
                 </div>
               </div>
             </div>
           </div>
-
         </div>
       </main>
     </div>
