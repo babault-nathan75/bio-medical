@@ -1,66 +1,80 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import Product from '@/models/Product';
-import { writeFile } from 'fs/promises';
-import path from 'path';
+import { v2 as cloudinary } from 'cloudinary';
+
+// Configuration de Cloudinary (Assure-toi d'avoir les variables dans ton .env)
+cloudinary.config({
+  cloud_name: process.env.local.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.local.CLOUDINARY_API_KEY,
+  api_secret: process.env.local.CLOUDINARY_API_SECRET,
+});
+
+// Fonction utilitaire pour envoyer un fichier vers Cloudinary
+const uploadToCloudinary = async (file, resourceType = 'auto') => {
+  const bytes = await file.arrayBuffer();
+  const buffer = Buffer.from(bytes);
+
+  return new Promise((resolve, reject) => {
+    cloudinary.uploader.upload_stream(
+      { 
+        folder: 'bio-medical-products', 
+        resource_type: resourceType 
+      },
+      (error, result) => {
+        if (error) reject(error);
+        else resolve(result.secure_url);
+      }
+    ).end(buffer);
+  });
+};
 
 export async function POST(request) {
   try {
     await dbConnect();
     
-    // On récupère toutes les données du formulaire (fichiers + textes)
     const data = await request.formData();
     
-    // Extraction des textes
     const name = data.get('name');
     const description = data.get('description');
     const price = data.get('price');
     const stockQuantity = data.get('stockQuantity');
-    const category = data.get('category'); // <--- MODIFICATION 1 : On récupère la catégorie
+    const category = data.get('category');
     
-    // Extraction des fichiers
     const imageFile = data.get('image');
     const videoFile = data.get('video');
 
     let imageUrl = '';
     let videoUrl = '';
 
-    // Fonction utilitaire pour sauvegarder un fichier sur ton PC (dans public/uploads)
-    const saveFile = async (file) => {
-      const bytes = await file.arrayBuffer();
-      const buffer = Buffer.from(bytes);
-      // On crée un nom unique pour éviter d'écraser des fichiers du même nom
-      const uniqueName = Date.now() + '-' + file.name.replaceAll(' ', '_');
-      const uploadPath = path.join(process.cwd(), 'public/uploads', uniqueName);
-      await writeFile(uploadPath, buffer);
-      return `/uploads/${uniqueName}`; // C'est le lien qu'on va sauvegarder dans MongoDB
-    };
-
-    // Si une image a été uploadée, on la sauvegarde
-    if (imageFile && imageFile.name !== 'undefined') {
-      imageUrl = await saveFile(imageFile);
+    // Upload de l'image vers Cloudinary (si présente)
+    if (imageFile && imageFile.name !== 'undefined' && imageFile.size > 0) {
+      imageUrl = await uploadToCloudinary(imageFile, 'image');
     }
 
-    // Si une vidéo a été uploadée, on la sauvegarde
-    if (videoFile && videoFile.name !== 'undefined') {
-      videoUrl = await saveFile(videoFile);
+    // Upload de la vidéo vers Cloudinary (si présente)
+    if (videoFile && videoFile.name !== 'undefined' && videoFile.size > 0) {
+      videoUrl = await uploadToCloudinary(videoFile, 'video');
     }
 
-    // On crée le produit dans MongoDB avec les liens des fichiers
+    // Création du produit dans MongoDB avec les URL Cloudinary
     const newProduct = await Product.create({
       name,
       description,
-      price: Number(price), // Number() gère très bien les décimales envoyées par le step="0.01"
+      price: Number(price),
       stockQuantity: Number(stockQuantity),
-      category, // <--- MODIFICATION 2 : On l'ajoute à la création du produit
-      imageUrl,
-      videoUrl
+      category,
+      imageUrl, // Sera maintenant : https://res.cloudinary.com/...
+      videoUrl  // Sera maintenant : https://res.cloudinary.com/...
     });
 
     return NextResponse.json({ success: true, product: newProduct }, { status: 201 });
 
   } catch (error) {
-    console.error("Erreur Upload:", error);
-    return NextResponse.json({ success: false, error: "Erreur lors de la création du produit" }, { status: 500 });
+    console.error("Erreur Upload Bio Medical:", error);
+    return NextResponse.json(
+      { success: false, error: "Erreur lors de la création du produit" }, 
+      { status: 500 }
+    );
   }
 }

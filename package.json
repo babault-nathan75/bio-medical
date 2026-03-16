@@ -9,6 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "cloudinary": "^2.9.0",
     "email-validator": "^2.0.4",
     "mongodb": "^7.1.0",
     "mongoose": "^9.2.1",

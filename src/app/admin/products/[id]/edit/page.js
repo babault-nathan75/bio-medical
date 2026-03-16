@@ -14,11 +14,12 @@ export default function EditProductPage({ params }) {
   
   const [categories, setCategories] = useState([]);
   const [productData, setProductData] = useState({
-    name: '', price: '', stockQuantity: '', category: '', description: '', imageUrl: ''
+    name: '', price: '', stockQuantity: '', category: '', description: '', imageUrl: '', videoUrl: ''
   });
 
   const [image, setImage] = useState(null);
   const [video, setVideo] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -37,6 +38,7 @@ export default function EditProductPage({ params }) {
             category: prodJson.data.category,
             description: prodJson.data.description || '',
             imageUrl: prodJson.data.imageUrl || '',
+            videoUrl: prodJson.data.videoUrl || '',
           });
         }
       } catch (error) {
@@ -48,12 +50,21 @@ export default function EditProductPage({ params }) {
     fetchData();
   }, [id]);
 
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setImage(file);
+      setImagePreview(URL.createObjectURL(file));
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setMessage(null);
 
     const formData = new FormData(e.target);
+    // On ajoute les fichiers seulement s'ils ont été modifiés
     if (image) formData.set('image', image);
     if (video) formData.set('video', video);
 
@@ -66,27 +77,28 @@ export default function EditProductPage({ params }) {
       const result = await response.json();
 
       if (result.success) {
-        alert("Produit mis à jour avec succès !");
+        alert("Produit Bio Medical mis à jour avec succès !");
         router.push('/admin/products');
+        router.refresh(); // Force la mise à jour des données côté client
       } else {
         setMessage({ type: 'error', text: result.error || 'Erreur lors de la modification.' });
       }
     } catch (error) {
-      setMessage({ type: 'error', text: 'Erreur serveur.' });
+      setMessage({ type: 'error', text: 'Erreur de connexion au serveur Cloud.' });
     } finally {
       setLoading(false);
     }
   };
 
-  if (pageLoading) return <div className="p-12 text-center text-gray-500">Chargement de l&#39;éditeur...</div>;
+  if (pageLoading) return <div className="p-12 text-center text-gray-500 animate-pulse">Chargement de l'éditeur médical...</div>;
 
   return (
-    <div className="p-6 md:p-12">
+    <div className="p-6 md:p-12 bg-[#F8F9FA] min-h-screen">
       <div className="max-w-4xl mx-auto">
         <div className="flex justify-between items-center mb-10">
           <div>
             <h1 className="text-3xl font-black text-[#2D2D2D]">Modifier le <span className="text-[#B57C4F]">Produit</span></h1>
-            <p className="text-gray-500">Mettez à jour les informations, le stock ou le prix.</p>
+            <p className="text-gray-500 text-sm">Identifiant : {id}</p>
           </div>
           <Link href="/admin/products" className="text-gray-500 font-bold hover:text-[#B57C4F] transition-colors">
             ← Retour au catalogue
@@ -94,7 +106,7 @@ export default function EditProductPage({ params }) {
         </div>
 
         {message && (
-          <div className={`p-4 mb-8 rounded-xl font-bold ${message.type === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+          <div className={`p-4 mb-8 rounded-xl font-bold shadow-sm ${message.type === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
             {message.text}
           </div>
         )}
@@ -110,19 +122,10 @@ export default function EditProductPage({ params }) {
               <div className="flex gap-4">
                 <div className="w-1/2">
                   <label className="block text-sm font-bold text-gray-700 mb-2">Prix (€)</label>
-                  {/* MODIFICATION ICI : step="any" permet les décimales */}
-                  <input 
-                    type="number" 
-                    name="price" 
-                    defaultValue={productData.price} 
-                    required 
-                    min="0" 
-                    step="any" 
-                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-[#B57C4F]" 
-                  />
+                  <input type="number" name="price" defaultValue={productData.price} required min="0" step="0.01" className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-[#B57C4F]" />
                 </div>
                 <div className="w-1/2">
-                  <label className="block text-sm font-bold text-gray-700 mb-2">Stock disponible</label>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">Stock</label>
                   <input type="number" name="stockQuantity" defaultValue={productData.stockQuantity} required min="0" className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-[#B57C4F]" />
                 </div>
               </div>
@@ -143,28 +146,37 @@ export default function EditProductPage({ params }) {
             </div>
 
             <div className="space-y-6">
-              <div className="border-2 border-dashed border-gray-300 rounded-2xl p-6 text-center hover:bg-gray-50 transition-colors">
+              {/* Image Cloudinary avec Preview */}
+              <div className="border-2 border-dashed border-gray-300 rounded-2xl p-6 text-center hover:bg-gray-50 transition-all">
                 <label className="cursor-pointer block">
-                  {productData.imageUrl && !image ? (
+                  {imagePreview || productData.imageUrl ? (
                     <div className="mb-4">
-                      <img src={productData.imageUrl} alt="Actuelle" className="w-32 h-32 object-cover mx-auto rounded-xl shadow-sm mb-2" />
-                      <span className="text-xs text-gray-500">Image actuelle. Cliquez pour remplacer.</span>
+                      <img 
+                        src={imagePreview || productData.imageUrl} 
+                        alt="Preview" 
+                        className="w-full h-40 object-contain mx-auto rounded-xl mb-2" 
+                      />
+                      <span className="text-xs text-[#B57C4F] font-bold">Cliquer pour modifier la photo</span>
                     </div>
                   ) : (
-                    <span className="text-4xl mb-2 block">📸</span>
+                    <>
+                      <span className="text-4xl mb-2 block">📸</span>
+                      <span className="text-sm font-bold text-gray-700">Ajouter une image</span>
+                    </>
                   )}
-                  <span className="text-sm font-bold text-gray-700">Nouvelle Image (Optionnel)</span>
-                  <input type="file" accept="image/*" onChange={(e) => setImage(e.target.files[0])} className="hidden" />
-                  {image && <span className="text-sm text-[#B57C4F] font-bold block bg-[#F2D0B4]/20 py-2 rounded-lg mt-2">{image.name}</span>}
+                  <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
                 </label>
               </div>
 
-              <div className="border-2 border-dashed border-gray-300 rounded-2xl p-6 text-center hover:bg-gray-50 transition-colors">
+              {/* Vidéo Cloudinary */}
+              <div className="border-2 border-dashed border-gray-300 rounded-2xl p-6 text-center hover:bg-gray-50 transition-all">
                 <label className="cursor-pointer block">
                   <span className="text-4xl mb-2 block">🎥</span>
-                  <span className="text-sm font-bold text-gray-700">Nouvelle Vidéo (Optionnel)</span>
+                  <span className="text-sm font-bold text-gray-700">
+                    {productData.videoUrl && !video ? "Vidéo présente (cliquer pour remplacer)" : "Vidéo de présentation"}
+                  </span>
                   <input type="file" accept="video/*" onChange={(e) => setVideo(e.target.files[0])} className="hidden" />
-                  {video && <span className="text-sm text-[#B57C4F] font-bold block bg-[#F2D0B4]/20 py-2 rounded-lg mt-2">{video.name}</span>}
+                  {video && <span className="text-xs text-[#B57C4F] font-bold block mt-2">{video.name}</span>}
                 </label>
               </div>
             </div>
@@ -173,9 +185,9 @@ export default function EditProductPage({ params }) {
           <button 
             type="submit" 
             disabled={loading}
-            className={`w-full py-4 text-white font-bold text-lg rounded-xl transition-all shadow-lg ${loading ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#2D2D2D] hover:bg-[#1a1a1a] hover:-translate-y-1 hover:shadow-xl'}`}
+            className={`w-full py-4 text-white font-bold text-lg rounded-xl transition-all shadow-lg ${loading ? 'bg-gray-400' : 'bg-[#2D2D2D] hover:bg-black hover:-translate-y-1'}`}
           >
-            {loading ? 'Mise à jour...' : 'Sauvegarder les modifications'}
+            {loading ? 'Mise à jour sur Cloudinary...' : 'Enregistrer les modifications'}
           </button>
         </form>
       </div>
