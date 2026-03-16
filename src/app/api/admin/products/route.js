@@ -15,8 +15,8 @@ export async function POST(request) {
     const name = data.get('name');
     const description = data.get('description');
     const price = data.get('price');
-    const category = data.get('category');
     const stockQuantity = data.get('stockQuantity');
+    const category = data.get('category'); // <--- MODIFICATION 1 : On récupère la catégorie
     
     // Extraction des fichiers
     const imageFile = data.get('image');
@@ -37,12 +37,12 @@ export async function POST(request) {
     };
 
     // Si une image a été uploadée, on la sauvegarde
-    if (imageFile && imageFile.name) {
+    if (imageFile && imageFile.name !== 'undefined') {
       imageUrl = await saveFile(imageFile);
     }
 
     // Si une vidéo a été uploadée, on la sauvegarde
-    if (videoFile && videoFile.name) {
+    if (videoFile && videoFile.name !== 'undefined') {
       videoUrl = await saveFile(videoFile);
     }
 
@@ -50,9 +50,9 @@ export async function POST(request) {
     const newProduct = await Product.create({
       name,
       description,
-      price: Number(price),
-      category,
+      price: Number(price), // Number() gère très bien les décimales envoyées par le step="0.01"
       stockQuantity: Number(stockQuantity),
+      category, // <--- MODIFICATION 2 : On l'ajoute à la création du produit
       imageUrl,
       videoUrl
     });

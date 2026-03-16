@@ -16,10 +16,6 @@ const ProductSchema = new mongoose.Schema({
     required: [true, 'Veuillez fournir un prix.'],
     min: [0, 'Le prix ne peut pas être négatif.'],
   },
-  category: {
-    type: String,
-    required: [true, 'Veuillez spécifier une catégorie (ex: Douleur, Énergie...).'],
-  },
   stockQuantity: {
     type: Number,
     required: [true, 'Veuillez définir la quantité en stock.'],

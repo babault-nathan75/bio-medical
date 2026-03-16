@@ -4,11 +4,14 @@ import Product from '@/models/Product';
 import { writeFile } from 'fs/promises';
 import path from 'path';
 
-// LECTURE (GET) - Récupère un seul produit pour pré-remplir le formulaire
+// LECTURE (GET) - Récupère un seul produit
 export async function GET(request, { params }) {
   await dbConnect();
   try {
-    const product = await Product.findById(params.id);
+    // MODIF : On attend la résolution des params
+    const { id } = await params;
+    
+    const product = await Product.findById(id);
     if (!product) return NextResponse.json({ success: false }, { status: 404 });
     return NextResponse.json({ success: true, data: product });
   } catch (error) {
@@ -16,14 +19,15 @@ export async function GET(request, { params }) {
   }
 }
 
-// MODIFICATION (PUT) - Met à jour les infos et les fichiers si besoin
+// MODIFICATION (PUT) - Met à jour les infos et les fichiers
 export async function PUT(request, { params }) {
   await dbConnect();
   try {
-    const { id } = params;
+    // MODIF : On attend la résolution des params
+    const { id } = await params;
     const data = await request.formData();
     
-    // Préparation des données texte à mettre à jour
+    // Préparation des données texte
     const updateData = {
       name: data.get('name'),
       description: data.get('description'),
@@ -35,7 +39,6 @@ export async function PUT(request, { params }) {
     const imageFile = data.get('image');
     const videoFile = data.get('video');
 
-    // Fonction utilitaire pour sauvegarder
     const saveFile = async (file) => {
       const bytes = await file.arrayBuffer();
       const buffer = Buffer.from(bytes);
@@ -45,17 +48,15 @@ export async function PUT(request, { params }) {
       return `/uploads/${uniqueName}`;
     };
 
-    // Si une NOUVELLE image a été ajoutée, on la sauvegarde et on met à jour l'URL
-    if (imageFile && typeof imageFile === 'object' && imageFile.name) {
+    // Vérification fichiers (on évite les fichiers vides ou undefined)
+    if (imageFile && typeof imageFile === 'object' && imageFile.name && imageFile.name !== 'undefined') {
       updateData.imageUrl = await saveFile(imageFile);
     }
 
-    // Pareil pour la vidéo
-    if (videoFile && typeof videoFile === 'object' && videoFile.name) {
+    if (videoFile && typeof videoFile === 'object' && videoFile.name && videoFile.name !== 'undefined') {
       updateData.videoUrl = await saveFile(videoFile);
     }
 
-    // Mise à jour dans la base de données
     const updatedProduct = await Product.findByIdAndUpdate(id, updateData, { new: true });
     if (!updatedProduct) return NextResponse.json({ success: false }, { status: 404 });
 
@@ -66,11 +67,13 @@ export async function PUT(request, { params }) {
   }
 }
 
-// SUPPRESSION (DELETE) - Reste inchangé
+// SUPPRESSION (DELETE)
 export async function DELETE(request, { params }) {
   await dbConnect();
   try {
-    const { id } = params;
+    // MODIF : On attend la résolution des params
+    const { id } = await params;
+    
     const deletedProduct = await Product.findByIdAndDelete(id);
     if (!deletedProduct) return NextResponse.json({ success: false }, { status: 404 });
     return NextResponse.json({ success: true, data: {} });

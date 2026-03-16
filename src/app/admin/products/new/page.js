@@ -7,14 +7,14 @@ export default function AddProductPage() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState(null);
   
-  // NOUVEAU : État pour stocker les catégories
+  // État pour stocker les catégories
   const [categories, setCategories] = useState([]);
   
   // Les états pour les fichiers
   const [image, setImage] = useState(null);
   const [video, setVideo] = useState(null);
 
-  // NOUVEAU : Charger les catégories depuis MongoDB au montage de la page
+  // Charger les catégories depuis MongoDB au montage de la page
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -74,7 +74,7 @@ export default function AddProductPage() {
             <p className="text-gray-500">Tableau de bord administrateur</p>
           </div>
           <div className="flex gap-4">
-            <Link href="/admin/categories" className="text-gray-500 font-bold hover:text-[#B57C4F] hover:underline transition-colors">
+            <Link href="/admin/categories" className="text-gray-500 font-bold hover:text-[#B57C4F] hover:underline transition-colors text-sm flex items-center">
               Gérer les catégories
             </Link>
             <Link href="/shop" className="text-[#B57C4F] font-bold hover:underline">
@@ -104,7 +104,15 @@ export default function AddProductPage() {
               <div className="flex gap-4">
                 <div className="w-1/2">
                   <label className="block text-sm font-bold text-gray-700 mb-2">Prix (FCFA)</label>
-                  <input type="number" name="price" required min="0" className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-[#B57C4F]" />
+                  {/* MODIFICATION : step="0.01" ajouté pour les décimales */}
+                  <input 
+                    type="number" 
+                    name="price" 
+                    required 
+                    min="0" 
+                    step="0.01" 
+                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-[#B57C4F]" 
+                  />
                 </div>
                 <div className="w-1/2">
                   <label className="block text-sm font-bold text-gray-700 mb-2">Stock initial</label>
@@ -114,9 +122,8 @@ export default function AddProductPage() {
 
               <div>
                 <label className="block text-sm font-bold text-gray-700 mb-2">Catégorie</label>
-                <select name="category" required className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-[#B57C4F]">
+                <select name="category" required className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-[#B57C4F] appearance-none">
                   <option value="">-- Sélectionnez une catégorie --</option>
-                  {/* Génération dynamique des options */}
                   {categories.map((cat) => (
                     <option key={cat._id} value={cat.name}>
                       {cat.name}
@@ -124,7 +131,7 @@ export default function AddProductPage() {
                   ))}
                 </select>
                 {categories.length === 0 && (
-                  <p className="text-xs text-red-500 mt-2">Aucune catégorie trouvée. Veuillez en créer une d'abord.</p>
+                  <p className="text-xs text-red-500 mt-2 font-medium">⚠️ Aucune catégorie trouvée. Veuillez en créer une d'abord.</p>
                 )}
               </div>
 
@@ -175,7 +182,11 @@ export default function AddProductPage() {
           <button 
             type="submit" 
             disabled={loading || categories.length === 0}
-            className={`w-full py-4 text-white font-bold text-lg rounded-xl transition-all shadow-lg ${loading || categories.length === 0 ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#2D2D2D] hover:bg-[#1a1a1a] hover:-translate-y-1 hover:shadow-xl'}`}
+            className={`w-full py-4 text-white font-bold text-lg rounded-xl transition-all shadow-lg ${
+              loading || categories.length === 0 
+              ? 'bg-gray-400 cursor-not-allowed' 
+              : 'bg-[#B57C4F] hover:bg-[#96653f] hover:-translate-y-1 hover:shadow-xl active:translate-y-0'
+            }`}
           >
             {loading ? 'Enregistrement en cours...' : 'Ajouter le produit à la boutique'}
           </button>

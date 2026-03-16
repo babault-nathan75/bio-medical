@@ -1,13 +1,11 @@
 "use client";
 
-import { useState, useEffect, use } from 'react'; // <-- AJOUT DE 'use'
+import { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 export default function EditProductPage({ params }) {
   const router = useRouter();
-  
-  // <-- CORRECTION : Déballage de la promesse params
   const { id } = use(params); 
   
   const [loading, setLoading] = useState(false);
@@ -22,16 +20,13 @@ export default function EditProductPage({ params }) {
   const [image, setImage] = useState(null);
   const [video, setVideo] = useState(null);
 
-  // Charger le produit existant ET les catégories
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // 1. Récupérer les catégories
         const catRes = await fetch('/api/admin/categories');
         const catJson = await catRes.json();
         if (catJson.success) setCategories(catJson.data);
 
-        // 2. Récupérer le produit spécifique
         const prodRes = await fetch(`/api/admin/products/${id}`);
         const prodJson = await prodRes.json();
         if (prodJson.success) {
@@ -72,7 +67,7 @@ export default function EditProductPage({ params }) {
 
       if (result.success) {
         alert("Produit mis à jour avec succès !");
-        router.push('/admin/products'); // Retour automatique à la liste
+        router.push('/admin/products');
       } else {
         setMessage({ type: 'error', text: result.error || 'Erreur lors de la modification.' });
       }
@@ -88,7 +83,6 @@ export default function EditProductPage({ params }) {
   return (
     <div className="p-6 md:p-12">
       <div className="max-w-4xl mx-auto">
-        
         <div className="flex justify-between items-center mb-10">
           <div>
             <h1 className="text-3xl font-black text-[#2D2D2D]">Modifier le <span className="text-[#B57C4F]">Produit</span></h1>
@@ -106,7 +100,6 @@ export default function EditProductPage({ params }) {
         )}
 
         <form onSubmit={handleSubmit} className="bg-white rounded-3xl shadow-xl border border-gray-100 p-8 sm:p-12">
-          
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
             <div className="space-y-6">
               <div>
@@ -116,8 +109,17 @@ export default function EditProductPage({ params }) {
               
               <div className="flex gap-4">
                 <div className="w-1/2">
-                  <label className="block text-sm font-bold text-gray-700 mb-2">Prix (€)</label>
-                  <input type="number" name="price" defaultValue={productData.price} required min="0" className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-[#B57C4F]" />
+                  <label className="block text-sm font-bold text-gray-700 mb-2">Prix (FCFA)</label>
+                  {/* MODIFICATION ICI : step="any" permet les décimales */}
+                  <input 
+                    type="number" 
+                    name="price" 
+                    defaultValue={productData.price} 
+                    required 
+                    min="0" 
+                    step="any" 
+                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-[#B57C4F]" 
+                  />
                 </div>
                 <div className="w-1/2">
                   <label className="block text-sm font-bold text-gray-700 mb-2">Stock disponible</label>
@@ -175,7 +177,6 @@ export default function EditProductPage({ params }) {
           >
             {loading ? 'Mise à jour...' : 'Sauvegarder les modifications'}
           </button>
-          
         </form>
       </div>
     </div>
