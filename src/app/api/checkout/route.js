@@ -1,6 +1,6 @@
 // src/app/api/checkout/route.js
 import { NextResponse } from 'next/server';
-import dbConnect from '@/dbConnect'; // Votre fonction de connexion
+import dbConnect from '@/lib/dbConnect'; // Votre fonction de connexion
 import Product from '@/models/Product';
 import Order from '@/models/Order';
 

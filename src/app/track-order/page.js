@@ -37,7 +37,7 @@ export default function TrackOrderPage() {
           <div className="flex flex-col md:flex-row gap-4">
             <input 
               type="text" 
-              placeholder="Ex: 1A2345"
+              placeholder="Ex: 1A2345" 
               className="flex-grow px-6 py-4 bg-gray-50 rounded-xl outline-none focus:ring-2 focus:ring-[#B57C4F]/20 border border-transparent focus:border-[#B57C4F] transition-all uppercase"
               value={orderId}
               onChange={(e) => setOrderId(e.target.value)}

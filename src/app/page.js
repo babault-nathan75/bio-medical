@@ -64,9 +64,9 @@ export default function LandingPage() {
             >
               VOIR LA BOUTIQUE <span>→</span>
             </Link>
-            <button className="px-8 py-4 border-2 border-[#2D2D2D] text-[#2D2D2D] text-xs font-bold tracking-widest uppercase hover:bg-gray-50 transition-all">
+            {/* <button className="px-8 py-4 border-2 border-[#2D2D2D] text-[#2D2D2D] text-xs font-bold tracking-widest uppercase hover:bg-gray-50 transition-all">
               En savoir plus
-            </button>
+            </button> */}
           </div>
         </div>
 
