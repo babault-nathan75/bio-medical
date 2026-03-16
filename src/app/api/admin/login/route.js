@@ -13,7 +13,8 @@ export async function POST(request) {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'strict',
-        maxAge: 60 * 60 * 24 
+        maxAge: 60 * 60 * 24,
+        path: '/', // INDISPENSABLE : rend le cookie accessible sur tout le site (et par le middleware)
       });
       
       return response;
@@ -21,6 +22,7 @@ export async function POST(request) {
 
     return NextResponse.json({ success: false, error: 'Mot de passe incorrect' }, { status: 401 });
   } catch (error) {
+    console.error("Erreur Login Admin:", error);
     return NextResponse.json({ success: false, error: 'Erreur serveur' }, { status: 500 });
   }
 }

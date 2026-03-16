@@ -1,17 +1,30 @@
 "use client";
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 
 export default function AdminLayout({ children }) {
-  // usePathname nous permet de savoir sur quelle page on est pour colorer le bon bouton
   const pathname = usePathname();
+  const router = useRouter();
 
   const navItems = [
     { name: 'Commandes', href: '/admin/orders', icon: '📦' },
-    { name: 'Produits', href: '/admin/products', icon: '💊' }, // <-- Modifié ici
+    { name: 'Produits', href: '/admin/products', icon: '💊' },
     { name: 'Catégories', href: '/admin/categories', icon: '🏷️' },
   ];
+
+  // Fonction pour gérer la déconnexion
+  const handleLogout = async () => {
+    try {
+      const res = await fetch('/api/admin/logout', { method: 'POST' });
+      if (res.ok) {
+        router.push('/admin/login');
+        router.refresh(); // Important pour réinitialiser le middleware
+      }
+    } catch (error) {
+      console.error("Erreur déconnexion:", error);
+    }
+  };
 
   return (
     <div className="flex flex-col md:flex-row min-h-screen bg-[#F8F9FA] font-sans">
@@ -47,19 +60,28 @@ export default function AdminLayout({ children }) {
           })}
         </nav>
 
-        {/* Bouton retour à la boutique en bas */}
-        <div className="p-4 border-t border-gray-100 hidden md:block">
+        {/* Zone du bas : Boutique + Déconnexion */}
+        <div className="p-4 border-t border-gray-100 space-y-2 hidden md:block">
           <Link 
             href="/shop" 
-            className="flex items-center gap-3 px-4 py-3 text-gray-500 hover:bg-gray-50 hover:text-[#2D2D2D] rounded-xl transition-all font-bold"
+            className="flex items-center gap-3 px-4 py-3 text-gray-500 hover:bg-gray-50 hover:text-[#2D2D2D] rounded-xl transition-all font-bold text-sm"
           >
             <span className="text-xl">🏬</span>
             Voir la boutique
           </Link>
+
+          {/* BOUTON DÉCONNEXION */}
+          <button 
+            onClick={handleLogout}
+            className="w-full flex items-center gap-3 px-4 py-3 text-red-500 hover:bg-red-50 rounded-xl transition-all font-bold text-sm"
+          >
+            <span className="text-xl">🚪</span>
+            Déconnexion
+          </button>
         </div>
       </aside>
 
-      {/* Zone de contenu principal (C'est ici que tes pages vont s'afficher) */}
+      {/* Zone de contenu principal */}
       <main className="flex-1 overflow-y-auto">
         {children}
       </main>

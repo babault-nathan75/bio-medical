@@ -1,15 +1,16 @@
 import { NextResponse } from 'next/server';
 
-// On utilise 'export default' pour le nouveau fichier proxy.js
 export default function proxy(request) {
   const { pathname } = request.nextUrl;
 
-  // Protection des routes /admin (sauf la page login)
-  if (pathname.startsWith('/admin') && !pathname.startsWith('/admin/login')) {
+  // On protège TOUT ce qui commence par /admin
+  // SAUF la page /admin/login (sinon on ne peut jamais se connecter)
+  if (pathname.startsWith('/admin') && pathname !== '/admin/login') {
     
-    // Vérification du cookie
+    // Vérification du cookie de session
     const authCookie = request.cookies.get('admin_auth');
 
+    // Si le cookie est absent ou n'est pas "true"
     if (!authCookie || authCookie.value !== 'true') {
       const loginUrl = new URL('/admin/login', request.url);
       return NextResponse.redirect(loginUrl);
@@ -19,7 +20,7 @@ export default function proxy(request) {
   return NextResponse.next();
 }
 
-// La configuration du matcher reste la même
+// Le matcher indique à Next.js de n'exécuter ce script que sur les routes admin
 export const config = {
   matcher: ['/admin/:path*'],
 };
