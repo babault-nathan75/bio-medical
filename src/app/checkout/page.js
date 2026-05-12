@@ -1,32 +1,45 @@
 "use client";
 
-import { useState, useEffect } from 'react'; 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation'; 
+import { useRouter } from 'next/navigation';
 import { useCart } from '@/context/CartContext';
+import { useCurrency } from '@/context/CurrencyContext';
 import Navbar from '@/components/Navbar';
+import Price from '@/components/Price';
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { cart, clearCart } = useCart(); 
+  const { cart, clearCart } = useCart();
+  const { country, convert } = useCurrency();
   const totalPrice = cart.reduce((total, item) => total + (item.price * item.quantity), 0);
-  
+
   const [loading, setLoading] = useState(false);
   const [mounted, setMounted] = useState(false);
 
-  // État du formulaire
+  // État du formulaire (ville pré-remplie selon le pays choisi)
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     phone: '',
     address: '',
-    city: 'Paris', 
+    city: '',
   });
 
   // Empêche l'erreur d'hydratation Next.js
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Met à jour la ville par défaut quand le pays change (uniquement si vide)
+  useEffect(() => {
+    if (!mounted) return;
+    const defaultCity = country.code === 'CI' || country.code === 'SN' ? 'Abidjan' : 'Paris';
+    setFormData((prev) => {
+      if (prev.city && prev.city !== 'Paris' && prev.city !== 'Abidjan') return prev;
+      return { ...prev, city: country.code === 'SN' ? 'Dakar' : defaultCity };
+    });
+  }, [country, mounted]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -37,14 +50,17 @@ export default function CheckoutPage() {
     setLoading(true);
 
     const orderData = {
-      customer: formData,
+      customer: { ...formData, country: country.code },
       orderItems: cart.map(item => ({
         product: item._id,
         name: item.name,
         quantity: item.quantity,
-        price: item.price
+        price: item.price // toujours stocké en EUR (devise de référence)
       })),
-      totalPrice: totalPrice
+      totalPrice: totalPrice,    // EUR de référence
+      country: country.code,     // FR, CI ou SN -> route l'email destinataire
+      displayCurrency: country.currency,
+      displayTotal: convert(totalPrice),
     };
 
     try {
@@ -98,6 +114,9 @@ export default function CheckoutPage() {
         <header className="mb-10">
           <h1 className="text-3xl md:text-4xl font-black text-[#2D2D2D]">Finaliser la <span className="text-[#B57C4F]">Commande</span></h1>
           <p className="text-gray-500 mt-2">Veuillez renseigner vos informations de livraison.</p>
+          <p className="mt-3 inline-block bg-[#F2D0B4]/30 text-[#B57C4F] font-bold text-xs uppercase tracking-wider px-3 py-1 rounded-full">
+            Livraison vers : {country.name} · Prix affichés en {country.symbol}
+          </p>
         </header>
 
         <div className="flex flex-col lg:flex-row gap-10">
@@ -135,10 +154,10 @@ export default function CheckoutPage() {
               <div className="mb-6">
                 <label className="block text-sm font-bold text-gray-700 mb-2">Numéro de Téléphone</label>
                 <input 
-                  type="tel" 
+                  type="tel"
                   name="phone"
                   required
-                  placeholder="ex: 06 12 34 56 78"
+                  placeholder={country.code === 'FR' ? 'ex: 06 12 34 56 78' : 'ex: 07 12 34 56 78'}
                   value={formData.phone}
                   onChange={handleChange}
                   className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-[#B57C4F] focus:ring-2 focus:ring-[#B57C4F]/20 transition-all"
@@ -150,10 +169,10 @@ export default function CheckoutPage() {
               <div className="mb-6">
                 <label className="block text-sm font-bold text-gray-700 mb-2">Adresse complète</label>
                 <input 
-                  type="text" 
+                  type="text"
                   name="address"
                   required
-                  placeholder="ex: 15 Rue de la Paix"
+                  placeholder={country.code === 'FR' ? 'ex: 15 Rue de la Paix' : 'ex: Cocody, Rue des Jardins'}
                   value={formData.address}
                   onChange={handleChange}
                   className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-[#B57C4F] focus:ring-2 focus:ring-[#B57C4F]/20 transition-all"
@@ -197,7 +216,7 @@ export default function CheckoutPage() {
                       <p className="text-xs text-gray-500">Qté: {item.quantity}</p>
                     </div>
                     <div className="text-sm font-bold text-[#B57C4F] shrink-0">
-                      {(item.price * item.quantity).toLocaleString('fr-FR')} €
+                      <Price amount={item.price * item.quantity} />
                     </div>
                   </div>
                 ))}
@@ -205,7 +224,7 @@ export default function CheckoutPage() {
               <div className="border-t border-gray-100 pt-4">
                 <div className="flex justify-between items-center mb-4">
                   <span className="text-lg font-bold text-[#2D2D2D]">Total à payer</span>
-                  <span className="text-2xl font-black text-[#2D2D2D]">{totalPrice.toLocaleString('fr-FR')} €</span>
+                  <Price amount={totalPrice} className="text-2xl font-black text-[#2D2D2D]" />
                 </div>
               </div>
             </div>

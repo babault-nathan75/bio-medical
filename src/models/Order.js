@@ -7,6 +7,7 @@ const OrderSchema = new mongoose.Schema({
     phone: { type: String, required: true },
     address: { type: String, required: true },
     city: { type: String, required: true },
+    country: { type: String, enum: ['FR', 'CI', 'SN'], default: 'FR' },
   },
   orderItems: [
     {

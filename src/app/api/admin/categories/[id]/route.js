@@ -6,14 +6,14 @@ import Category from '@/models/Category';
 export async function PUT(request, { params }) {
   await dbConnect();
   try {
-    const { id } = params;
+    const { id } = await params;
     const body = await request.json();
     const category = await Category.findByIdAndUpdate(id, body, { new: true, runValidators: true });
     if (!category) return NextResponse.json({ success: false }, { status: 404 });
-    
+
     return NextResponse.json({ success: true, data: category });
   } catch (error) {
-    return NextResponse.json({ success: false }, { status: 400 });
+    return NextResponse.json({ success: false, error: error.message }, { status: 400 });
   }
 }
 
@@ -21,12 +21,12 @@ export async function PUT(request, { params }) {
 export async function DELETE(request, { params }) {
   await dbConnect();
   try {
-    const { id } = params;
-    const deletedCategory = await Category.deleteOne({ _id: id });
+    const { id } = await params;
+    const deletedCategory = await Category.findByIdAndDelete(id);
     if (!deletedCategory) return NextResponse.json({ success: false }, { status: 404 });
-    
+
     return NextResponse.json({ success: true, data: {} });
   } catch (error) {
-    return NextResponse.json({ success: false }, { status: 400 });
+    return NextResponse.json({ success: false, error: error.message }, { status: 400 });
   }
 }

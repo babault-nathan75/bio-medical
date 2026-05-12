@@ -24,11 +24,16 @@ export default function Footer() {
         </div>
 
         {/* Liens et Contact */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 py-16">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-12 py-16">
           <div>
-            <h4 className="font-bold uppercase text-sm mb-6">Contact</h4>
+            <h4 className="font-bold uppercase text-sm mb-6">Contact France 🇫🇷</h4>
             <p className="text-sm text-gray-500 mb-2">+33 1 79 75 37 38</p>
             <p className="text-sm text-gray-500">biomedicalparis@gmail.com</p>
+          </div>
+          <div>
+            <h4 className="font-bold uppercase text-sm mb-6">Contact Côte d'Ivoire 🇨🇮</h4>
+            <p className="text-sm text-gray-500 mb-2">+225 05 66 12 79 35</p>
+            <p className="text-sm text-gray-500">zigalou225@gmail.com</p>
           </div>
           <div>
             <h4 className="font-bold uppercase text-sm mb-6">Catégories Principales</h4>

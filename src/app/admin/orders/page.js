@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Price from '@/components/Price';
 
 export default function AdminOrdersPage() {
   const [orders, setOrders] = useState([]);
@@ -139,7 +140,14 @@ export default function AdminOrdersPage() {
                       </td>
                       
                       <td className="p-6">
-                        <div className="font-black text-lg text-[#2D2D2D]">{order.totalPrice.toLocaleString('fr-FR')} €</div>
+                        <div className="font-black text-lg text-[#2D2D2D]">
+                          {order.customer?.country === 'CI' || order.customer?.country === 'SN'
+                            ? `${Math.round(order.totalPrice * 655.957).toLocaleString('fr-FR')} FCFA`
+                            : `${order.totalPrice.toLocaleString('fr-FR')} €`}
+                        </div>
+                        <div className="text-[10px] text-gray-400 mt-1 uppercase tracking-wider">
+                          {order.customer?.country === 'CI' ? "Côte d'Ivoire" : order.customer?.country === 'SN' ? 'Sénégal' : 'France'}
+                        </div>
                       </td>
                       
                       <td className="p-6">

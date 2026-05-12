@@ -1,7 +1,7 @@
 import { Inter } from "next/font/google";
 import "./globals.css";
-// On importe notre Provider
 import { CartProvider } from "@/context/CartContext";
+import { CurrencyProvider } from "@/context/CurrencyContext";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -14,10 +14,11 @@ export default function RootLayout({ children }) {
   return (
     <html lang="fr">
       <body className={inter.className}>
-        {/* On englobe les enfants (toutes les pages) avec le CartProvider */}
-        <CartProvider>
-          {children}
-        </CartProvider>
+        <CurrencyProvider>
+          <CartProvider>
+            {children}
+          </CartProvider>
+        </CurrencyProvider>
       </body>
     </html>
   );

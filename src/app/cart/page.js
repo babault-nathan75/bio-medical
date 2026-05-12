@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useCart } from '@/context/CartContext';
 import Navbar from '@/components/Navbar';
+import Price from '@/components/Price';
 
 export default function CartPage() {
   const { cart, removeFromCart, updateQuantity } = useCart();
@@ -90,7 +91,7 @@ export default function CartPage() {
                   {/* Prix et Suppression */}
                   <div className="flex flex-col items-end gap-3 shrink-0">
                     <span className="text-lg sm:text-xl font-black text-[#2D2D2D]">
-                      {(item.price * item.quantity).toLocaleString('fr-FR')} <span className="text-xs text-gray-400 font-medium">€</span>
+                      <Price amount={item.price * item.quantity} symbolClassName="text-xs text-gray-400 font-medium" />
                     </span>
                     
                     <button 
@@ -113,7 +114,7 @@ export default function CartPage() {
                 <div className="space-y-4 text-gray-600 mb-6 text-sm">
                   <div className="flex justify-between">
                     <span>Sous-total</span>
-                    <span className="font-semibold">{totalPrice.toLocaleString('fr-FR')} €</span>
+                    <span className="font-semibold"><Price amount={totalPrice} /></span>
                   </div>
                   <p className="text-green-600 text-xs font-medium bg-green-50 p-3 rounded-xl">
                     Le montant de la livraison vous sera communiqué par téléphone lors de la confirmation.
@@ -124,10 +125,11 @@ export default function CartPage() {
                   <div className="flex justify-between items-end">
                     <span className="text-lg font-bold text-[#2D2D2D]">Total</span>
                     <div className="text-right">
-                      <span className="text-3xl font-black text-[#B57C4F]">
-                        {totalPrice.toLocaleString('fr-FR')}
-                      </span>
-                      <span className="ml-1 text-xs text-gray-500 font-medium uppercase">€</span>
+                      <Price
+                        amount={totalPrice}
+                        className="text-3xl font-black text-[#B57C4F]"
+                        symbolClassName="text-xs text-gray-500 font-medium uppercase"
+                      />
                     </div>
                   </div>
                 </div>

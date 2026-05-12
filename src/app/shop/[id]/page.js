@@ -3,6 +3,7 @@ import dbConnect from '@/lib/dbConnect';
 import Product from '@/models/Product';
 import Navbar from '@/components/Navbar';
 import AddToCartButton from '@/components/AddToCartButton';
+import Price from '@/components/Price';
 
 export default async function ProductDetails({ params }) {
   // 1. MODIFICATION CRUCIALE : Attendre les params
@@ -79,10 +80,11 @@ export default async function ProductDetails({ params }) {
 
             <div className="border-t border-gray-100 pt-6 mt-2 mb-8">
               <div className="flex items-end gap-3">
-                <span className="text-4xl font-black text-[#2D2D2D]">
-                  {product.price?.toLocaleString('fr-FR')}
-                </span>
-                <span className="text-xl text-gray-400 font-medium mb-1">€</span>
+                <Price
+                  amount={product.price || 0}
+                  className="text-4xl font-black text-[#2D2D2D] inline-flex items-end gap-2"
+                  symbolClassName="text-xl text-gray-400 font-medium"
+                />
               </div>
               <p className={`text-sm mt-2 font-medium ${isAvailable ? 'text-green-600' : 'text-red-500'}`}>
                 {isAvailable ? `En stock (${product.stockQuantity} disponibles)` : 'Indisponible'}

@@ -6,6 +6,7 @@ import Category from '@/models/Category';
 import Navbar from '@/components/Navbar';
 import AddToCartButton from '@/components/AddToCartButton';
 import Footer from '@/components/Footer';
+import Price from '@/components/Price';
 
 export const dynamic = 'force-dynamic';
 
@@ -14,9 +15,20 @@ export default async function ShopPage({ searchParams }) {
   
   const resolvedParams = await searchParams;
   const currentCategory = resolvedParams.category || 'Tous';
+  const searchTerm = (resolvedParams.search || '').trim();
 
-  const query = currentCategory === 'Tous' ? {} : { category: currentCategory };
-  
+  const query = {};
+  if (currentCategory !== 'Tous') query.category = currentCategory;
+  if (searchTerm) {
+    const escaped = searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const regex = new RegExp(escaped, 'i');
+    query.$or = [
+      { name: regex },
+      { description: regex },
+      { category: regex },
+    ];
+  }
+
   const [rawProducts, dbCategories] = await Promise.all([
     Product.find(query).lean(),
     Category.find({}).sort({ name: 1 }).lean()
@@ -57,9 +69,25 @@ export default async function ShopPage({ searchParams }) {
           <span className="block text-[#B57C4F] font-bold text-[10px] uppercase tracking-[0.3em] mb-4">
             Bio Medical
           </span>
-          <h1 className="text-4xl md:text-6xl font-black text-[#2D2D2D] mb-12 tracking-tighter">
+          <h1 className="text-4xl md:text-6xl font-black text-[#2D2D2D] mb-6 tracking-tighter">
             La Boutique<span className="text-[#B57C4F]">.</span>
           </h1>
+
+          {searchTerm && (
+            <div className="mb-8 flex items-center justify-center gap-3">
+              <p className="text-sm text-gray-500">
+                Résultats pour <span className="font-bold text-[#2D2D2D]">&laquo; {searchTerm} &raquo;</span> — {products.length} produit{products.length > 1 ? 's' : ''}
+              </p>
+              <Link
+                href={currentCategory === 'Tous' ? '/shop' : `/shop?category=${currentCategory}`}
+                className="text-[10px] font-bold uppercase tracking-widest text-[#B57C4F] hover:underline"
+              >
+                Effacer ×
+              </Link>
+            </div>
+          )}
+          <div className="mb-6" />
+
           
           {/* BARRE DE FILTRAGE ÉLÉGANTE */}
           <div className="flex justify-center items-center">
@@ -89,7 +117,9 @@ export default async function ShopPage({ searchParams }) {
           <div className="text-center py-32 border-2 border-dashed border-gray-100 rounded-[3rem]">
             <span className="text-6xl block mb-6 opacity-40">🌿</span>
             <p className="text-gray-400 font-medium tracking-tight italic">
-              Nous préparons de nouveaux soins dans cette catégorie...
+              {searchTerm
+                ? <>Aucun soin ne correspond à &laquo; {searchTerm} &raquo;.</>
+                : 'Nous préparons de nouveaux soins dans cette catégorie...'}
             </p>
           </div>
         ) : (
@@ -135,7 +165,7 @@ export default async function ShopPage({ searchParams }) {
                   
                   <div className="flex flex-col items-center gap-4">
                     <p className="text-lg font-bold text-[#2D2D2D]">
-                      {product.price.toLocaleString('fr-FR')} <span className="text-md text-[#B57C4F] ml-1">€</span>
+                      <Price amount={product.price} symbolClassName="text-md text-[#B57C4F]" />
                     </p>
                     
                     <div className="w-full max-w-[140px]">

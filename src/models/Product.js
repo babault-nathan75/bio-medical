@@ -22,6 +22,11 @@ const ProductSchema = new mongoose.Schema({
     min: [0, 'Le stock ne peut pas être négatif.'],
     default: 0,
   },
+  category: {
+    type: String,
+    default: '',
+    trim: true,
+  },
   imageUrl: {
     type: String,
     default: '', 

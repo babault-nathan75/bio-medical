@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Price from '@/components/Price';
 
 export default function AdminProductsList() {
   const [products, setProducts] = useState([]);
@@ -45,12 +46,15 @@ export default function AdminProductsList() {
     }
   };
 
-  // Filtrage des produits
-  const filteredProducts = products.filter(product => 
-    product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    product.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    product._id.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Filtrage des produits (tolère l'absence de catégorie)
+  const filteredProducts = products.filter(product => {
+    const q = searchTerm.toLowerCase();
+    return (
+      (product.name || '').toLowerCase().includes(q) ||
+      (product.category || '').toLowerCase().includes(q) ||
+      (product._id || '').toLowerCase().includes(q)
+    );
+  });
 
   return (
     <div className="p-6 md:p-12 bg-[#F8F9FA] min-h-screen font-sans">
@@ -119,13 +123,13 @@ export default function AdminProductsList() {
                       </td>
                       
                       <td className="p-6">
-                        <span className="inline-block px-3 py-1 bg-[#F2D0B4]/30 text-[#B57C4F] font-bold text-[11px] rounded-full uppercase tracking-tight">
-                          {product.category}
+                        <span className="inline-block px-10 py-1 bg-[#F2D0B4]/30 text-[#B57C4F] font-bold text-[12px] rounded-full uppercase">
+                          {product.category || 'Sans catégorie'}
                         </span>
                       </td>
-                      
+
                       <td className="p-6 font-black text-[#2D2D2D]">
-                        {product.price.toLocaleString('fr-FR')}€
+                        <Price amount={product.price} />
                       </td>
                       
                       <td className="p-6">
@@ -135,18 +139,18 @@ export default function AdminProductsList() {
                         </div>
                       </td>
                       
-                      <td className="p-6 text-right space-x-2">
+                      <td className="p-6 text-right space-y-1">
                         <Link 
                           href={`/admin/products/${product._id}/edit`} 
-                          className="inline-block text-xs font-bold text-gray-600 bg-gray-100 px-4 py-2.5 rounded-xl hover:bg-gray-200 transition-colors"
+                          className="inline-block text-xs font-bold text-gray-50 bg-green-400 px-4 py-2.5 rounded-xl hover:bg-green-600 transition-colors"
                         >
-                          Éditer
+                          Modifier ✏️
                         </Link>
                         <button 
                           onClick={() => handleDelete(product._id)} 
-                          className="inline-block text-xs font-bold text-red-500 bg-red-50 px-4 py-2.5 rounded-xl hover:bg-red-100 transition-colors"
+                          className="inline-block text-xs font-bold text-white bg-red-400 px-4 py-2.5 rounded-xl hover:bg-red-600 transition-colors"
                         >
-                          Supprimer
+                          Supprimer 🗑️
                         </button>
                       </td>
 
