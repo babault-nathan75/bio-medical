@@ -27,7 +27,7 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 py-16">
           <div>
             <h4 className="font-bold uppercase text-sm mb-6">Contact France 🇫🇷</h4>
-            <p className="text-sm text-gray-500 mb-2">+33 1 79 75 37 38</p>
+            <p className="text-sm text-gray-500 mb-2">+33 7 82 12 62 59</p>
             <p className="text-sm text-gray-500">biomedicalparis@gmail.com</p>
           </div>
           <div>

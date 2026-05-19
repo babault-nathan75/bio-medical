@@ -7,6 +7,7 @@ import Navbar from '@/components/Navbar';
 import AddToCartButton from '@/components/AddToCartButton';
 import Footer from '@/components/Footer';
 import Price from '@/components/Price';
+import SearchBar from '@/components/SearchBar';
 
 export const dynamic = 'force-dynamic';
 
